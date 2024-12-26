@@ -1,0 +1,193 @@
+# URL Shortener API Documentation
+
+## Base URL
+```
+http://localhost:5000
+```
+
+---
+
+## Authentication Endpoints
+
+### 1. Google Sign-In
+#### Endpoint
+```
+POST /auth/google-signin
+```
+
+#### Description
+Authenticates users via Google OAuth and generates a JWT token for session management.
+
+#### Request Headers
+None
+
+#### Request Body
+```json
+{
+  "token": "google-id-token"
+}
+```
+
+#### Response
+**200 OK**
+```json
+{
+  "message": "Signed in successfully",
+  "token": "<jwt-token>",
+  "user": {
+    "id": "user-id",
+    "name": "User Name",
+    "email": "user@example.com"
+  }
+}
+```
+
+**400 Bad Request**
+```json
+{
+  "error": "Invalid or expired Google token"
+}
+```
+
+---
+
+## URL Management Endpoints
+
+### 2. Create Short URL
+#### Endpoint
+```
+POST /url/create
+```
+
+#### Description
+Generates a short URL for a given original URL and associates it with an optional topic.
+
+#### Request Headers
+```json
+{
+  "Authorization": "Bearer <jwt-token>"
+}
+```
+
+#### Request Body
+```json
+{
+  "originalUrl": "https://example.com",
+  "topic": "example-topic"
+}
+```
+
+#### Response
+**201 Created**
+```json
+{
+  "message": "Short URL created successfully",
+  "shortUrl": "http://localhost:5000/url/abc123",
+  "shortId": "abc123"
+}
+```
+
+**400 Bad Request**
+```json
+{
+  "error": "Invalid URL format"
+}
+```
+
+**401 Unauthorized**
+```json
+{
+  "error": "Authorization token missing or invalid"
+}
+```
+
+---
+
+### 3. Redirect to Original URL
+#### Endpoint
+```
+GET /url/:shortId
+```
+
+#### Description
+Redirects the user to the original URL associated with the given `shortId`.
+
+#### Request Parameters
+| Name      | Type   | Description              |
+|-----------|--------|--------------------------|
+| `shortId` | String | The short ID of the URL. |
+
+#### Response
+**302 Found** (Redirection to the original URL)
+
+**404 Not Found**
+```json
+{
+  "error": "Short URL not found"
+}
+```
+
+---
+
+### 4. Retrieve URL Analytics
+#### Endpoint
+```
+GET /url/analytics/:shortId
+```
+
+#### Description
+Retrieves analytics data for the given `shortId`, including audience and usage data.
+
+#### Request Headers
+```json
+{
+  "Authorization": "Bearer <jwt-token>"
+}
+```
+
+#### Request Parameters
+| Name      | Type   | Description              |
+|-----------|--------|--------------------------|
+| `shortId` | String | The short ID of the URL. |
+
+#### Response
+**200 OK**
+```json
+{
+  "shortId": "abc123",
+  "originalUrl": "https://example.com",
+  "clicks": 123,
+  "analytics": [
+    {
+      "ip": "192.168.1.1",
+      "userAgent": "Mozilla/5.0",
+      "os": "Windows 10",
+      "deviceType": "Desktop",
+      "geoLocation": {
+        "country": "United States",
+        "city": "New York"
+      },
+      "timestamp": "2024-12-22T12:00:00Z"
+    }
+  ]
+}
+```
+
+**401 Unauthorized**
+```json
+{
+  "error": "Authorization token missing or invalid"
+}
+```
+
+**404 Not Found**
+```json
+{
+  "error": "Short URL not found"
+}
+```
+
+---
+
+
+
